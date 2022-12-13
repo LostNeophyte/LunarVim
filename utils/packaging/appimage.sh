@@ -7,6 +7,7 @@ REPO_DIR="$(git rev-parse --show-toplevel)"
 mkdir build/bin -p
 cd build
 
+rm -rf AppDir
 cmake -DCMAKE_INSTALL_PREFIX=/usr "$REPO_DIR"
 make install DESTDIR=AppDir
 
@@ -29,11 +30,26 @@ cat << 'EOF' > AppDir/AppRun
 #!/bin/bash
 unset ARGV0
 ROOT_DIR="$(dirname "$(readlink  -f "${0}")")"
-exec "$ROOT_DIR/usr/bin/lvim" ${@+"$@"}
+PATH="$ROOT_DIR/usr/bin:$PATH"
+exec lvim ${@+"$@"}
 EOF
 chmod 755 AppDir/AppRun
 
-# initialize AppDir and build AppImage
+# bundle NeoVim
+
+NVIM_LINK="https://github.com/neovim/neovim/releases/download/stable/nvim.appimage"
+
+if [ -e nvim.AppImage ]; then
+  curl -Lo nvim.AppImage -z nvim.AppImage $NVIM_LINK  
+else
+  curl -Lo nvim.AppImage $NVIM_LINK
+fi
+chmod +x nvim.AppImage
+./nvim.AppImage --appimage-extract
+rm -r squashfs-root/usr/share/metainfo
+cp -rn squashfs-root/* AppDir/ 
+
+# build AppImage
 
 if [ -z "$ARCH" ]; then
   ARCH="$(arch)"
