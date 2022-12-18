@@ -44,8 +44,26 @@ function plugin_loader.init(opts)
 
   if not utils.is_directory(install_path) then
     print "Initializing first time setup"
-    print "Installing packer"
-    print(vim.fn.system { "git", "clone", "--depth", "1", "https://github.com/wbthomason/packer.nvim", install_path })
+
+    local plugins_dir = join_paths(get_lvim_base_dir(), "plugins")
+    if utils.is_directory(plugins_dir) then
+      print "Copying plugins"
+      vim.cmd "redraw"
+      vim.fn.mkdir(init_opts.package_root, "p")
+      utils.fs_copy(join_paths(plugins_dir), join_paths(init_opts.package_root, "packer"))
+      vim.schedule(function()
+        vim.api.nvim_create_autocmd("User", {
+          pattern = "PackerComplete",
+          callback = function()
+            vim.cmd "quitall"
+          end,
+        })
+        require("packer").sync()
+      end)
+    else
+      print "Installing packer"
+      print(vim.fn.system { "git", "clone", "--depth", "1", "https://github.com/wbthomason/packer.nvim", install_path })
+    end
     vim.cmd "packadd packer.nvim"
   end
 

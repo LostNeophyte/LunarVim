@@ -104,4 +104,36 @@ function M.write_file(path, txt, flag)
   end)
 end
 
+---Copies a file or directory recursively
+---@param source string
+---@param destination string
+function M.fs_copy(source, destination)
+  local source_stats, handle
+  local success, error
+
+  source_stats, error = vim.loop.fs_stat(source)
+  assert(source_stats, error)
+
+  if source_stats.type == "file" then
+    success, error = vim.loop.fs_copyfile(source, destination)
+    assert(success, error)
+    return
+  elseif source_stats.type == "directory" then
+    handle, error = vim.loop.fs_scandir(source)
+    assert(handle, error)
+
+    success, error = vim.loop.fs_mkdir(destination, source_stats.mode)
+    assert(success, error)
+
+    while true do
+      local name, _ = vim.loop.fs_scandir_next(handle)
+      if not name then
+        break
+      end
+
+      M.fs_copy(M.join_paths(source, name), M.join_paths(destination, name))
+    end
+  end
+end
+
 return M
