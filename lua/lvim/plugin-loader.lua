@@ -48,6 +48,7 @@ function plugin_loader.init(opts)
     local plugins_dir = join_paths(get_lvim_base_dir(), "plugins")
     if utils.is_directory(plugins_dir) then
       print "Copying plugins"
+      init_opts.autoremove = true
       vim.cmd "redraw"
       vim.fn.mkdir(init_opts.package_root, "p")
       utils.fs_copy(join_paths(plugins_dir), join_paths(init_opts.package_root, "packer"))
