@@ -19,7 +19,6 @@ on:
 
 jobs:
   plugins-version-bump:
-    if: github.repository_owner == 'LunarVim'
     runs-on: ubuntu-latest
     continue-on-error: false
     permissions:
@@ -35,7 +34,7 @@ jobs:
           version: nightly
 
       - name: Install LunarVim
-        timeout-minutes: 4
+        timeout-minutes: 8
         run: |
           ./utils/installer/install.sh --local --no-install-dependencies
 
