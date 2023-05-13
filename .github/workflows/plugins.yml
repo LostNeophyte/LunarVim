@@ -34,7 +34,7 @@ jobs:
           version: nightly
 
       - name: Install LunarVim
-        timeout-minutes: 8
+        timeout-minutes: 4
         run: |
           ./utils/installer/install.sh --local --no-install-dependencies
 
